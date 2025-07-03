@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mukwano Industries Payroll System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Mukwano Industries Payroll System</h2>
+        <form method="post">
+            <label for="basic_pay">Enter Basic Pay (UGX):</label>
+            <input type="number" name="basic_pay" id="basic_pay" required>
+            <button type="submit">Calculate</button>
+        </form>
+
+        <?php
+        if ($_SERVER["REQUEST_METHOD"] == "POST") {
+            $basic_pay = floatval($_POST["basic_pay"]);
+            $overtime_hours = 10;
+            $overtime_rate = 30000;
+            $overtime_pay = $overtime_hours * $overtime_rate;
+
+            // Initial Gross Pay (temporary to calculate allowances)
+            $temp_gross = $basic_pay + $overtime_pay;
+
+            // Allowances
+            $housing_allowance = 0.08 * $temp_gross;
+            $transport_allowance = 0.05 * $temp_gross;
+            $medical_allowance = 0.06 * $temp_gross;
+            $total_allowances = $housing_allowance + $transport_allowance + $medical_allowance;
+
+            // Final Gross Pay
+            $gross_pay = $basic_pay + $overtime_pay + $total_allowances;
+
+            // Deductions
+            $nssf = 0.15 * $gross_pay;
+
+            // PAYEE Calculation
+            if ($gross_pay < 200000) {
+                $payee = 0;
+            } elseif ($gross_pay < 350000) {
+                $payee = 0.10 * ($gross_pay - 200000);
+            } elseif ($gross_pay < 500000) {
+                $payee = 20000 + 0.20 * ($gross_pay - 350000);
+            } else {
+                $payee = 60500 + 0.30 * ($gross_pay - 500000);
+            }
+
+            $total_deductions = $nssf + $payee;
+            $net_pay = $gross_pay - $total_deductions;
+
+            echo "<div class='results'>
+                    <h3>Salary Breakdown</h3>
+                    <p><strong>Basic Pay:</strong> UGX " . number_format($basic_pay) . "</p>
+                    <p><strong>Overtime Pay (10 hrs):</strong> UGX " . number_format($overtime_pay) . "</p>
+                    <p><strong>Housing Allowance (8%):</strong> UGX " . number_format($housing_allowance) . "</p>
+                    <p><strong>Transport Allowance (5%):</strong> UGX " . number_format($transport_allowance) . "</p>
+                    <p><strong>Medical Allowance (6%):</strong> UGX " . number_format($medical_allowance) . "</p>
+                    <p><strong>Total Allowances:</strong> UGX " . number_format($total_allowances) . "</p>
+                    <p><strong>Gross Pay:</strong> UGX " . number_format($gross_pay) . "</p>
+                    <p><strong>NSSF (15%):</strong> UGX " . number_format($nssf) . "</p>
+                    <p><strong>PAYEE:</strong> UGX " . number_format($payee) . "</p>
+                    <p><strong>Net Pay:</strong> UGX " . number_format($net_pay) . "</p>
+                </div>";
+        }
+        ?>
+    </div>
+</body>
+</html>
